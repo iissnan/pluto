@@ -1,0 +1,21 @@
+{
+  "name": "pluto",
+  "version": "1.0.0",
+  "description": "The Pluto",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": {
+    "name": "Vi",
+    "email": "iissnan@gmail.com"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "electron": "^1.4.14"
+  }
+}
