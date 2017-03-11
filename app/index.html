@@ -6,8 +6,61 @@
 </head>
 <body>
   <h1>Hello World!</h1>
-  We are using node <script>document.write(process.versions.node)</script>,
-  Chrome <script>document.write(process.versions.chrome)</script>,
-  and Electron <script>document.write(process.versions.electron)</script>.
+  <button id="selectDirectory">Select Directory</button>
+  <span id="selectedDirectory"></span>
+
+  <ul id="result"></ul>
+
+  <div class="pagination">
+    <button class="pagination-previous">Previous</button>
+    <button class="pagination-next">Next</button>
+  </div>
+
+  <div hidden>
+    We are using node <script>document.write(process.versions.node)</script>,
+    Chrome <script>document.write(process.versions.chrome)</script>,
+    and Electron <script>document.write(process.versions.electron)</script>.
+  </div>
+
+  <script>
+  const path = require('path');
+  const {dialog} = require('electron').remote;
+  const readdir = require('../lib/readdir');
+  const paginate = require('../lib/paginate');
+
+  document.querySelector('#selectDirectory').onclick = function () {
+    var path = dialog.showOpenDialog({
+        properties: ['openDirectory']
+    });
+    var selectedDirectory = path[0];
+    document.querySelector('#selectedDirectory').innerHTML = selectedDirectory;
+    readdir(selectedDirectory, selectedDirectory).then(entries => {
+      let page = 1;
+
+      document.querySelector('.pagination-previous').onclick = function () {
+        page = page - 1;
+        if (page <= 0) {
+          page = 1;
+        }
+        render(paginate(entries, page).items);
+      };
+      document.querySelector('.pagination-next').onclick = function () {
+        page = page + 1;
+        render(paginate(entries, page).items);
+      };
+
+      render(paginate(entries).items);
+    })
+    .catch(err => console.log(err));
+
+    function render(collection) {
+      let list = collection.reduce((items, item) => {
+        return items + `<li><img src="${item}" /></li>`;
+      }, '');
+
+      document.querySelector('#result').innerHTML = list;
+    }
+  };
+  </script>
 </body>
 </html>
