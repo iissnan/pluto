@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>Hello World!</title>
+  <link rel="stylesheet" href="assets/gallery/justifiedGallery.min.css">
+  <link rel="stylesheet" href="assets/colorbox/example3/colorbox.css">
 </head>
 <body>
   <h1>Hello World!</h1>
   <button id="selectDirectory">Select Directory</button>
   <span id="selectedDirectory"></span>
 
-  <ul id="result"></ul>
-
   <div class="pagination">
     <button class="pagination-previous">Previous</button>
     <button class="pagination-next">Next</button>
   </div>
+
+  <div id="result"></div>
 
   <div hidden>
     We are using node <script>document.write(process.versions.node)</script>,
@@ -22,8 +24,20 @@
     and Electron <script>document.write(process.versions.electron)</script>.
   </div>
 
+  <!-- Insert this line above script imports  -->
+  <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+  <!-- normal script imports etc  -->
+  <script src="assets/jquery-3.1.1.min.js"></script>
+  <script src="assets/gallery/jquery.justifiedGallery.min.js"></script>
+  <script src="assets/colorbox/jquery.colorbox.js"></script>
+
+  <!-- Insert this line after script imports -->
+  <script>if (window.module) module = window.module;</script>
+
   <script>
   const path = require('path');
+  const _ = require('lodash');
   const {dialog} = require('electron').remote;
   const readdir = require('../lib/readdir');
   const paginate = require('../lib/paginate');
@@ -42,23 +56,40 @@
         if (page <= 0) {
           page = 1;
         }
-        render(paginate(entries, page).items);
+        render(paginate(entries, page).items, page);
       };
       document.querySelector('.pagination-next').onclick = function () {
         page = page + 1;
-        render(paginate(entries, page).items);
+        render(paginate(entries, page).items, page);
       };
 
-      render(paginate(entries).items);
+      render(paginate(entries).items, page);
     })
     .catch(err => console.log(err));
 
-    function render(collection) {
+    function render(collection, page) {
       let list = collection.reduce((items, item) => {
-        return items + `<li><img src="${item}" /></li>`;
+        let content = _.endsWith(item, '.mp4') ?
+          `<video src="${item}" />` : `<img src="${item}" />`
+        return items + `<a href="${item}">${content}</a>`;
       }, '');
 
       document.querySelector('#result').innerHTML = list;
+      $("#result").justifiedGallery({
+        lastRow : 'nojustify',
+        rowHeight : 180,
+        rel : `page-${page}`,
+        margins : 2
+      }).on('jg.complete', function () {
+          $(this).find('a').colorbox({
+              maxWidth : '80%',
+              maxHeight : '80%',
+              opacity : 0.8,
+              transition : 'elastic',
+              current : '',
+              loop: false
+          });
+      });;
     }
   };
   </script>
