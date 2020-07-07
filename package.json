@@ -16,6 +16,6 @@
     "lodash": "^4.17.4"
   },
   "devDependencies": {
-    "electron": "^1.4.14"
+    "electron": "^9.1.0"
   }
 }
